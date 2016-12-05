@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"></script>
+</head>
+<body>
+<div id="chartReno" style="height: 600px; width: 100%;">
+	</div>
+<script>
+	window.onload = function () {
+	$.getJSON( "api/reno", function( data ) {
+	  		var chart = new CanvasJS.Chart("chartReno",
+			{
+				title:{
+					text: "TCP Reno",
+					fontSize: 20
+				},
+	                        animationEnabled: true,
+				axisX: {
+					title:"Time",
+					titleFontSize: 18,
+					valueFormatString:"###.#######"				
+					
+				},
+				axisY:{
+					title: "Packet Number",
+					titleFontSize: 16				
+				},
+				legend: {
+					verticalAlign: 'bottom',
+					horizontalAlign: "center"
+				},
+
+				data: [
+				],
+	          legend:{
+	            cursor:"pointer",
+	            itemclick : function(e) {
+	              if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+	                e.dataSeries.visible = false;              
+	              }
+	              else {
+	                e.dataSeries.visible = true;              
+	              }
+	              chart.render();
+	            }
+	          }
+			});
+	  var items = [];
+	  var ack = {
+	  	type: "scatter",     
+		name: "ACK",
+		markerType: "triangle",
+		showInLegend: true, 
+		color:'yellow',
+        toolTipContent: "<span style='\"'color: {color};'\"'><strong>{name}</strong></span><br/><strong> Time</strong> {x}sec <br/><strong> Packet Number</strong></span> {y}",
+        valueFormatString:"###.#######",
+        dataPoints:[]
+	  }
+	  var drop = {
+	  	type: "scatter",     
+		name: "DROP",
+		markerType: "cross",
+		showInLegend: true, 
+		color:'red',
+        toolTipContent: "<span style='\"'color: {color};'\"'><strong>{name}</strong></span><br/><strong> Time</strong> {x}sec <br/><strong> Packet Number</strong></span> {y}",
+        valueFormatString:"###.#######",
+        dataPoints:[]
+	  }
+	  var enqueue = {
+	  	type: "scatter",     
+		name: "ENQUEUE",
+		markerType: "circle",
+		showInLegend: true, 
+		color:'black',
+        toolTipContent: "<span style='\"'color: {color};'\"'><strong>{name}</strong></span><br/><strong> Time</strong> {x}sec <br/><strong> Packet Number</strong></span> {y}",
+        valueFormatString:"###.#######",
+        dataPoints:[]
+	  }
+	  var denqueue = {
+	  	type: "scatter",     
+		name: "DENQUEUE",
+		markerType: "square",
+		showInLegend: true, 
+		color:'blue',
+        toolTipContent: "<span style='\"'color: {color};'\"'><strong>{name}</strong></span><br/><strong> Time</strong> {x}sec <br/><strong> Packet Number</strong></span> {y}",
+        valueFormatString:"###.#######",
+        dataPoints:[]
+	  }
+	  for(i=0;i<data.reno.length;i++){
+	  	if(data.reno[i].packetType=="ack"){
+	  		point = {}
+	  		point.x= parseFloat(data.reno[i].time)
+	  		point.y= parseInt(data.reno[i].seq)
+	  		ack.dataPoints.push(point)
+	  	}
+	  	if(data.reno[i].typeId=='d'){
+	  		point = {}
+	  		point.x= parseFloat(data.reno[i].time)
+	  		point.y= parseInt(data.reno[i].seq)
+	  		drop.dataPoints.push(point)
+	  	}
+	  	if(data.reno[i].typeId=='+'){
+	  		point = {}
+	  		point.x= parseFloat(data.reno[i].time)
+	  		point.y= parseInt(data.reno[i].seq)
+	  		enqueue.dataPoints.push(point)
+	  	}
+	  	if(data.reno[i].typeId=='-'){
+	  		point = {}
+	  		point.x= parseFloat(data.reno[i].time)
+	  		point.y= parseInt(data.reno[i].seq)
+	  		denqueue.dataPoints.push(point)
+	  	}
+	  }
+	  chart.options.data.push(enqueue)
+	  chart.options.data.push(denqueue)
+	  chart.options.data.push(ack)
+	  chart.options.data.push(drop)
+	  
+	  console.log(chart)
+	  chart.render();
+
+	 
+	});
+
+
+}
+</script>
+</body>
+</html>
